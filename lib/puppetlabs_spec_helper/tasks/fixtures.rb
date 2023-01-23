@@ -113,7 +113,7 @@ module PuppetlabsSpecHelper::Tasks::FixtureHelpers
 
     result = {}
     if fixtures.include?(category) && !fixtures[category].nil?
-      defaults = { 'target' => 'spec/fixtures/modules' }
+      defaults = { 'target' => module_working_directory }
 
       # load defaults from the `.fixtures.yml` `defaults` section
       # for the requested category and merge them into my defaults
@@ -274,9 +274,9 @@ module PuppetlabsSpecHelper::Tasks::FixtureHelpers
 
   def module_working_directory
     # The problem with the relative path is that PMT doesn't expand the path properly and so passing in a relative path here
-    # becomes something like C:\somewhere\backslashes/spec/fixtures/work-dir on Windows, and then PMT barfs itself.
+    # becomes something like C:\somewhere\backslashes/spec/fixtures/modules on Windows, and then PMT barfs itself.
     # This has been reported as https://tickets.puppetlabs.com/browse/PUP-4884
-    File.expand_path(ENV['MODULE_WORKING_DIR'] || 'spec/fixtures/work-dir')
+    File.expand_path(ENV['MODULE_WORKING_DIR'] || 'spec/fixtures/modules')
   end
 
   # returns the current thread count that is currently active
@@ -369,7 +369,7 @@ module PuppetlabsSpecHelper::Tasks::FixtureHelpers
 
   # @return [String] - the spec/fixtures/modules directory in the module root folder
   def module_target_dir
-    @module_target_dir ||= File.expand_path('spec/fixtures/modules')
+    @module_target_dir ||= File.expand_path(module_working_directory)
   end
 
   # @return [Boolean] - returns true if the module was downloaded successfully, false otherwise
@@ -420,7 +420,7 @@ task :spec_prep do
   end
 
   # git has a race condition creating that directory, that would lead to aborted clone operations
-  FileUtils.mkdir_p('spec/fixtures/modules')
+  FileUtils.mkdir_p(module_working_directory)
 
   symlinks.each { |target, link| setup_symlink(target, link) }
 
